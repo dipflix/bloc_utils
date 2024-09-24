@@ -22,6 +22,16 @@ sealed class DynamicState<T> extends Equatable {
     throw UnimplementedError();
   }
 
+  R maybeWhen<R>({
+    R Function()? loading,
+    R Function(SuccessState<T> state)? success,
+    R Function(ErrorState<T> error)? error,
+    R Function()? empty,
+    required R Function() orElse,
+  }) {
+    throw UnimplementedError();
+  }
+
   @override
   List<Object?> get props => [];
 }
@@ -38,6 +48,22 @@ final class LoadingState<T> extends DynamicState<T> {
     R Function()? empty,
   }) {
     return loading?.call();
+  }
+
+  @override
+  @optionalTypeArgs
+  R maybeWhen<R>({
+    R Function()? loading,
+    R Function(SuccessState<T> state)? success,
+    R Function(ErrorState<T> error)? error,
+    R Function()? empty,
+    required R Function() orElse,
+  }) {
+    if (loading != null) {
+      return loading();
+    }
+
+    return orElse();
   }
 
   @override
@@ -89,6 +115,22 @@ final class SuccessState<T> extends DynamicState<T> {
   }) {
     return success!(this);
   }
+
+  @override
+  @optionalTypeArgs
+  R maybeWhen<R>({
+    R Function()? loading,
+    R Function(SuccessState<T> state)? success,
+    R Function(ErrorState<T> error)? error,
+    R Function()? empty,
+    required R Function() orElse,
+  }) {
+    if (success != null) {
+      return success(this);
+    }
+
+    return orElse();
+  }
 }
 
 final class ErrorState<T> extends DynamicState<T> {
@@ -120,6 +162,22 @@ final class ErrorState<T> extends DynamicState<T> {
   }) {
     return error!(this);
   }
+
+  @override
+  @optionalTypeArgs
+  R maybeWhen<R>({
+    R Function()? loading,
+    R Function(SuccessState<T> state)? success,
+    R Function(ErrorState<T> error)? error,
+    R Function()? empty,
+    required R Function() orElse,
+  }) {
+    if (error != null) {
+      return error(this);
+    }
+
+    return orElse();
+  }
 }
 
 final class EmptyState<T> extends DynamicState<T> {
@@ -145,5 +203,21 @@ final class EmptyState<T> extends DynamicState<T> {
     R Function()? empty,
   }) {
     return empty!();
+  }
+
+  @override
+  @optionalTypeArgs
+  R maybeWhen<R>({
+    R Function()? loading,
+    R Function(SuccessState<T> state)? success,
+    R Function(ErrorState<T> error)? error,
+    R Function()? empty,
+    required R Function() orElse,
+  }) {
+    if (empty != null) {
+      return empty();
+    }
+
+    return orElse();
   }
 }
