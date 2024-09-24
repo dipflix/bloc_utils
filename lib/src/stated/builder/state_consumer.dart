@@ -14,7 +14,7 @@ final class BlocStateConsumerBuilder<T extends DynamicStatedCubitStream>
 
   @override
   Widget build(BuildContext context) {
-    return context.read<T>().state.when(success: (state) {
+    return context.read<T>().state.whenOrNull(success: (state) {
           return builder(state.data);
         }) ??
         const SizedBox();

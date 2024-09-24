@@ -58,7 +58,7 @@ class BlocStateBuilder<T> extends StatelessWidget {
       bloc: listener,
       buildWhen: buildWhen,
       builder: (BuildContext context, state) {
-        Widget content = state.when(
+        Widget content = state.whenOrNull(
               loading: () =>
                   loadingBuilder?.call() ??
                   BlocStateBuilderThemeProvider.of(context)
