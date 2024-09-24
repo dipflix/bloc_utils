@@ -14,7 +14,7 @@ sealed class DynamicState<T> extends Equatable {
     } else if (this is SuccessState<T>) {
       return success?.call(this as SuccessState<T>);
     } else if (this is ErrorState<T>) {
-      return error?.call((this as ErrorState<T>).error);
+      return error?.call((this as ErrorState<T>));
     } else if (this is EmptyState<T>) {
       return empty?.call();
     }
