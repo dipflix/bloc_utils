@@ -30,7 +30,7 @@ class BlocStateBuilder<T> extends StatelessWidget {
   });
 
   factory BlocStateBuilder.invisible({
-    required StatedCubit<T> listener,
+    required DynamicStatedCubitStream<T> listener,
     required Widget Function(T state) builder,
     Widget Function()? loadingBuilder,
     Widget Function()? emptyBuilder,
