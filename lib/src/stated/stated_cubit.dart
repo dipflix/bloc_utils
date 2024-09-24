@@ -13,10 +13,6 @@ abstract class StatedCubit<T> extends Cubit<DynamicState<T>> {
 
   Future<void> onClose() async {}
 
-  void change(DynamicState<T> state) {
-    emit(state);
-  }
-
   @override
   Future<void> close() async {
     await onClose();
