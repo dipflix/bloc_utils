@@ -13,7 +13,7 @@ sealed class DynamicState<T> extends Equatable {
     return null;
   }
 
-  R when<R>({
+  R? when<R>({
     R Function()? loading,
     R Function(SuccessState<T> state)? success,
     R Function(ErrorState<T> error)? error,
@@ -68,7 +68,7 @@ final class LoadingState<T> extends DynamicState<T> {
 
   @override
   @optionalTypeArgs
-  R when<R>({
+  R? when<R>({
     R Function()? loading,
     R Function(SuccessState<T> state)? success,
     R Function(ErrorState<T> error)? error,
@@ -107,13 +107,13 @@ final class SuccessState<T> extends DynamicState<T> {
 
   @override
   @optionalTypeArgs
-  R when<R>({
+  R? when<R>({
     R Function()? loading,
     R Function(SuccessState<T> state)? success,
     R Function(ErrorState<T> error)? error,
     R Function()? empty,
   }) {
-    return success!(this);
+    return success?.call(this);
   }
 
   @override
@@ -154,13 +154,13 @@ final class ErrorState<T> extends DynamicState<T> {
 
   @override
   @optionalTypeArgs
-  R when<R>({
+  R? when<R>({
     R Function()? loading,
     R Function(SuccessState<T> state)? success,
     R Function(ErrorState<T> error)? error,
     R Function()? empty,
   }) {
-    return error!(this);
+    return error?.call(this);
   }
 
   @override
@@ -196,13 +196,13 @@ final class EmptyState<T> extends DynamicState<T> {
 
   @override
   @optionalTypeArgs
-  R when<R>({
+  R? when<R>({
     R Function()? loading,
     R Function(SuccessState<T> state)? success,
     R Function(ErrorState<T> error)? error,
     R Function()? empty,
   }) {
-    return empty!();
+    return empty?.call();
   }
 
   @override
