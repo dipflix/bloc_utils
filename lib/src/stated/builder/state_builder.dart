@@ -6,20 +6,20 @@ import '../state/status_bloc_state.dart';
 import '../stated_cubit.dart';
 
 class BlocStateBuilder<T> extends StatelessWidget {
-  final DynamicStatedCubitStream<T> listener;
+  final DynamicStatedCubitStream<T>? listener;
   final Widget Function()? loadingBuilder;
   final Widget Function()? emptyBuilder;
-  final Widget Function(ErrorState<dynamic> e)? errorBuilder;
+  final Widget Function(Object e)? errorBuilder;
   final Widget Function(T state) builder;
   final Duration animationDuration;
   final Widget Function(Widget child, Animation<double> animation)?
       transitionBuilder;
 
-  final bool Function(DynamicState<T>, DynamicState<T>)? buildWhen;
+  final bool Function(BlocDynamicState<T>, BlocDynamicState<T>)? buildWhen;
 
   const BlocStateBuilder({
     super.key,
-    required this.listener,
+    this.listener,
     required this.builder,
     this.loadingBuilder,
     this.emptyBuilder,
@@ -30,15 +30,15 @@ class BlocStateBuilder<T> extends StatelessWidget {
   });
 
   factory BlocStateBuilder.invisible({
-    required DynamicStatedCubitStream<T> listener,
+     DynamicStatedCubitStream<T>? listener,
     required Widget Function(T state) builder,
     Widget Function()? loadingBuilder,
     Widget Function()? emptyBuilder,
-    Widget Function(ErrorState<dynamic> e)? errorBuilder,
+    Widget Function(Object e)? errorBuilder,
     Duration animationDuration = const Duration(milliseconds: 300),
     Widget Function(Widget child, Animation<double> animation)?
         transitionBuilder,
-    bool Function(DynamicState<T>, DynamicState<T>)? buildWhen,
+    bool Function(BlocDynamicState<T>, BlocDynamicState<T>)? buildWhen,
   }) {
     return BlocStateBuilder(
       listener: listener,
@@ -54,8 +54,8 @@ class BlocStateBuilder<T> extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BlocBuilder<DynamicStatedCubitStream<T>, DynamicState<T>>(
-      bloc: listener,
+    return BlocBuilder<DynamicStatedCubitStream<T>, BlocDynamicState<T>>(
+      bloc: listener ?? context.read<DynamicStatedCubitStream<T>>(),
       buildWhen: buildWhen,
       builder: (BuildContext context, state) {
         Widget content = state.whenOrNull(
@@ -67,11 +67,11 @@ class BlocStateBuilder<T> extends StatelessWidget {
                   const Center(
                     child: CircularProgressIndicator(),
                   ),
-              success: (state) => builder(state.data),
+              success: (state) => builder(state),
               error: (state) =>
                   errorBuilder?.call(state) ??
                   Text(
-                    'Error: ${state.error}',
+                    'Error: ${state}',
                   ),
               empty: () =>
                   emptyBuilder?.call() ?? const Text('No data available'),
