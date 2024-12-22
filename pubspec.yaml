@@ -1,6 +1,6 @@
 name: bloc_utils
 description: "Bloc utils by dipflix"
-version: 0.1.0
+version: 0.1.1
 
 environment:
   sdk: ^3.5.2
