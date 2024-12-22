@@ -12,12 +12,10 @@ class BlocStateBuilder<T> extends StatelessWidget {
   final Widget Function(Object e)? errorBuilder;
   final Widget Function(T state) builder;
   final Duration animationDuration;
-  final Widget Function(Widget child, Animation<double> animation)?
-      transitionBuilder;
 
   final bool Function(BlocDynamicState<T>, BlocDynamicState<T>)? buildWhen;
 
-  const BlocStateBuilder({
+  BlocStateBuilder({
     super.key,
     this.listener,
     required this.builder,
@@ -25,30 +23,35 @@ class BlocStateBuilder<T> extends StatelessWidget {
     this.emptyBuilder,
     this.errorBuilder,
     this.animationDuration = const Duration(milliseconds: 300),
-    this.transitionBuilder,
     this.buildWhen,
   });
 
-  factory BlocStateBuilder.invisible({
-     DynamicStatedCubitStream<T>? listener,
-    required Widget Function(T state) builder,
-    Widget Function()? loadingBuilder,
-    Widget Function()? emptyBuilder,
-    Widget Function(Object e)? errorBuilder,
-    Duration animationDuration = const Duration(milliseconds: 300),
-    Widget Function(Widget child, Animation<double> animation)?
-        transitionBuilder,
-    bool Function(BlocDynamicState<T>, BlocDynamicState<T>)? buildWhen,
-  }) {
-    return BlocStateBuilder(
-      listener: listener,
-      builder: builder,
-      buildWhen: buildWhen,
-      loadingBuilder: loadingBuilder ?? () => const SizedBox.shrink(),
-      emptyBuilder: emptyBuilder ?? () => const SizedBox.shrink(),
-      errorBuilder: errorBuilder ?? (_) => const SizedBox.shrink(),
-      animationDuration: animationDuration,
-      transitionBuilder: transitionBuilder ?? (child, animation) => child,
+  BlocStateBuilder.invisible({
+    super.key,
+    required this.builder,
+    this.listener,
+    this.loadingBuilder = SizedBox.shrink,
+    this.emptyBuilder = SizedBox.shrink,
+    this.errorBuilder,
+    this.animationDuration = const Duration(milliseconds: 300),
+    this.buildWhen,
+  });
+
+  Widget buildWidgetState(BuildContext context, BlocDynamicState<T> state) {
+    return state.when(
+      loading: () =>
+          loadingBuilder?.call() ??
+          BlocStateBuilderThemeProvider.of(context)?.buildLoader?.call() ??
+          const Center(
+            child: CircularProgressIndicator(),
+          ),
+      success: (state) => builder(state),
+      error: (state) =>
+          errorBuilder?.call(state) ??
+          Text(
+            'Error: ${state}',
+          ),
+      empty: () => emptyBuilder?.call() ?? const Text('No data available'),
     );
   }
 
@@ -57,51 +60,7 @@ class BlocStateBuilder<T> extends StatelessWidget {
     return BlocBuilder<DynamicStatedCubitStream<T>, BlocDynamicState<T>>(
       bloc: listener ?? context.read<DynamicStatedCubitStream<T>>(),
       buildWhen: buildWhen,
-      builder: (BuildContext context, state) {
-        Widget content = state.whenOrNull(
-              loading: () =>
-                  loadingBuilder?.call() ??
-                  BlocStateBuilderThemeProvider.of(context)
-                      ?.buildLoader
-                      ?.call() ??
-                  const Center(
-                    child: CircularProgressIndicator(),
-                  ),
-              success: (state) => builder(state),
-              error: (state) =>
-                  errorBuilder?.call(state) ??
-                  Text(
-                    'Error: ${state}',
-                  ),
-              empty: () =>
-                  emptyBuilder?.call() ?? const Text('No data available'),
-            ) ??
-            const SizedBox();
-
-        return AnimatedSwitcher(
-          duration: animationDuration,
-          transitionBuilder: transitionBuilder ?? defaultTransitionBuilder,
-          child: content,
-        );
-      },
-    );
-  }
-
-  static Widget defaultTransitionBuilder(
-    Widget child,
-    Animation<double> animation,
-  ) {
-    const offset = Offset(0.0, 0.02);
-    final slideTransition = SlideTransition(
-      position: Tween<Offset>(
-        begin: offset,
-        end: Offset.zero,
-      ).animate(animation),
-      child: child,
-    );
-    return FadeTransition(
-      opacity: animation,
-      child: slideTransition,
+      builder: buildWidgetState,
     );
   }
 }
