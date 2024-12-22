@@ -6,7 +6,7 @@ import '../state/status_bloc_state.dart';
 import '../stated_cubit.dart';
 
 class BlocStateBuilder<T> extends StatelessWidget {
-  final DynamicStatedCubitStream<T>? listener;
+  final DynamicStatedCubitStream<T> listener;
   final Widget Function()? loadingBuilder;
   final Widget Function()? emptyBuilder;
   final Widget Function(Object e)? errorBuilder;
@@ -17,7 +17,7 @@ class BlocStateBuilder<T> extends StatelessWidget {
 
   BlocStateBuilder({
     super.key,
-    this.listener,
+    required this.listener,
     required this.builder,
     this.loadingBuilder,
     this.emptyBuilder,
@@ -29,7 +29,7 @@ class BlocStateBuilder<T> extends StatelessWidget {
   BlocStateBuilder.invisible({
     super.key,
     required this.builder,
-    this.listener,
+    required this.listener,
     this.loadingBuilder = SizedBox.shrink,
     this.emptyBuilder = SizedBox.shrink,
     this.errorBuilder,
@@ -39,26 +39,43 @@ class BlocStateBuilder<T> extends StatelessWidget {
 
   Widget buildWidgetState(BuildContext context, BlocDynamicState<T> state) {
     return state.when(
-      loading: () =>
-          loadingBuilder?.call() ??
-          BlocStateBuilderThemeProvider.of(context)?.buildLoader?.call() ??
-          const Center(
-            child: CircularProgressIndicator(),
-          ),
-      success: (state) => builder(state),
-      error: (state) =>
-          errorBuilder?.call(state) ??
-          Text(
-            'Error: ${state}',
-          ),
-      empty: () => emptyBuilder?.call() ?? const Text('No data available'),
+      loading: () {
+        final defaultBuilder =
+            BlocStateBuilderThemeProvider.of(context)?.buildLoader;
+
+        if (loadingBuilder != null) {
+          return loadingBuilder!();
+        } else if (defaultBuilder != null) {
+          return defaultBuilder();
+        }
+
+        return const Center(
+          child: CircularProgressIndicator(),
+        );
+      },
+      success: builder,
+      error: (state) {
+        if (errorBuilder != null) {
+          return errorBuilder!(state);
+        }
+
+        return Text(
+          'Error: ${state}',
+        );
+      },
+      empty: () {
+        if(emptyBuilder != null){
+          return emptyBuilder!();
+        }
+        return const Text('No data available');
+      },
     );
   }
 
   @override
   Widget build(BuildContext context) {
     return BlocBuilder<DynamicStatedCubitStream<T>, BlocDynamicState<T>>(
-      bloc: listener ?? context.read<DynamicStatedCubitStream<T>>(),
+      bloc: listener,
       buildWhen: buildWhen,
       builder: buildWidgetState,
     );
