@@ -40,7 +40,22 @@ base class BlocDynamicStateBuilder<S>
     return _BlocDynamicSuccessOrElseStateBuilder<S>(
       bloc: bloc,
       buildWhen: buildWhen,
+      builder: builder,
       orElse: orElse,
+    );
+  }
+
+  factory BlocDynamicStateBuilder.onlySuccess({
+    required DynamicStatedBlocStream<S> bloc,
+    final bool Function(BlocDynamicState<S>, BlocDynamicState<S>)? buildWhen,
+    Widget Function(BuildContext context, S state)? builder,
+    Widget Function(BuildContext context)? orElse,
+  }) {
+    return _BlocDynamicSuccessOrElseStateBuilder<S>(
+      bloc: bloc,
+      buildWhen: buildWhen,
+      builder: builder,
+      orElse: orElse ?? (_) => const SizedBox.shrink(),
     );
   }
 
