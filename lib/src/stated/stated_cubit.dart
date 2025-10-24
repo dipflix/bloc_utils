@@ -13,6 +13,22 @@ abstract class StatedCubit<T> extends Cubit<BlocDynamicState<T>> {
 
   Future<void> onClose() async {}
 
+  void emitLoading() {
+    emit(const LoadingState());
+  }
+
+  void emitSuccess(T data) {
+    emit(SuccessState(data));
+  }
+
+  void emitError(Object error) {
+    emit(ErrorState(error: error));
+  }
+
+  void emitEmpty() {
+    emit(const EmptyState());
+  }
+
   @override
   Future<void> close() async {
     await onClose();
